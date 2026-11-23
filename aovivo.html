@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cultão TV - Multitela ao Vivo</title>
+  <style>
+    :root {
+        --azul-escuro: #0f172a;    /* Fundo principal da página */
+        --azul-card: #1e293b;      /* Fundo dos cards e menus */
+        --azul-destaque: #2563eb;  /* Azul para detalhes secundários */
+        --amarelo: #facc15;        /* Cor de destaque principal (Gols/Botões) */
+        --amarelo-hover: #eab308;  /* Tom de hover para o amarelo */
+        --branco: #ffffff;         /* Textos principais e títulos */
+        --cinza-claro: #cbd5e1;    /* Parágrafos e textos secundários */
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #0b1120;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex: column;
+      flex-direction: column;
+    }
+
+    /* Cabeçalho idêntico ao da imagem */
+    header {
+        background-color: rgba(11, 15, 25, 0.9);
+        border-bottom: 1px solid var(--borda);
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+        backdrop-filter: blur(10px);
+    }
+
+    header {
+        background-color: var(--azul-card);
+        border: 2px solid var(--amarelo); /* Linha amarela de assinatura */
+        border-bottom: 2px solid var(--amarelo);
+        padding: 15px 50px;
+        display: flex;
+        justify-content: space-between;
+        border-radius: 8px;
+        align-items: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo {
+        font-size: 24px;
+        font-weight: 900;
+        color: var(--branco);
+        letter-spacing: 1px;
+    }
+
+    .logo span {
+        color: var(--amarelo);
+    }
+
+    .btn-volta:hover {
+        background-color: #725c05;
+    }
+    .btn-volta:active {
+        transform: scale(0.98);
+    }
+
+    .btn-volta {      /* Fixa o elemento na tela (não sai do lugar ao rolar) */
+        top: 90px;             /* Distância de 20px do topo */
+        right: 20px;           /* Distância de 20px da direita */
+        z-index: 1000;
+    }
+
+
+    .btn-volta { /* Mantém o botão fixo no canto mesmo ao rolar a página */
+        padding: 10px 20px;
+        background-color: #facc15;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+    }
+
+    /* Conteúdo Principal */
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .titulo-evento {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Grid Multitela (1 tela principal + 2 telas secundárias) */
+    .mosaico-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 22px;
+    }
+
+    /* Cartão de Vídeo + Rodapé (Estilo da imagem) */
+    .player-card {
+      background-color: #1c283d;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+      border: 1.5px solid #26344d;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.2s;
+    }
+
+    /* Destaque para a tela que está na posição principal */
+    .player-card.principal {
+      grid-column: 1 / 2;
+      grid-row: 1 / 3;
+      border-color: #f5b800;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background-color: #050505;
+      flex: 1;
+    }
+
+    .video-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .badge-ao-vivo {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background-color: rgba(11, 17, 32, 0.85);
+      border: 1px solid #2b3a55;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 5px 10px;
+      border-radius: 5px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      pointer-events: none;
+    }
+
+    .ponto-pulso {
+      width: 7px;
+      height: 7px;
+      background-color: #ef4444;
+      border-radius: 50%;
+      animation: piscar 1.2s infinite;
+    }
+
+    @keyframes piscar {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    .btn-focar {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background-color: #f5b800;
+      color: white;
+      border: none;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 10;
+      transition: background-color 0.2s;
+    }
+
+    .btn-focar:hover {
+      background-color: #ffd038;
+    }
+
+    /* Esconde o botão de focar quando a tela já está em destaque */
+    .player-card.principal .btn-focar {
+      display: none;
+    }
+
+    /* Rodapé do Player (Placar / Descrição da Câmera) */
+    .player-footer {
+      background-color: #1c283d;
+      padding: 14px 20px;
+      text-align: center;
+      border-top: 1px solid #283752;
+    }
+
+    .info-principal {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 3px;
+    }
+
+    .player-card.principal .info-principal {
+      font-size: 17px;
+    }
+
+    .info-destaque {
+      font-size: 16px;
+      font-weight: 800;
+      color: #f5b800;
+    }
+
+    .player-card.principal .info-destaque {
+      font-size: 20px;
+    }
+
+    /* Responsividade para celulares e tablets */
+    @media (max-width: 960px) {
+      .mosaico-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .player-card.principal {
+        grid-column: auto;
+        grid-row: auto;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="aovivo.css">
+</head>
+<body>
+
+  <!-- Cabeçalho -->
+  <header>
+    <div class="logo" style="font-size: 36px;">Cultão<span>TV</span></div>
+    <a href="tela inicial.html" style="font-family: cursive; font-size: 16px;"><button class="btn-volta" onclick="history.back()"><strong>Voltar</strong></button></a>
+  </header>
+
+  <!-- Área Principal -->
+  <main>
+    <h1 class="titulo-evento">Ao Vivo <span class="pulso-onda"></span></h1>
+
+    <!-- Mosaico com as 3 Telas Simultâneas -->
+    <div class="mosaico-grid">
+
+      <!-- TELA 1: JOGO AO VIVO (Inicia como Principal) -->
+      <article class="player-card principal" id="card-jogo">
+        <div class="video-container">
+          <div class="badge-ao-vivo"><span class="ponto-pulso"></span> Jogo ao Vivo</div>
+          <button class="btn-focar" onclick="definirPrincipal('card-jogo')">Expandir</button>
+          <!-- Substitua ID_VIDEO_JOGO pelo ID real do vídeo no YouTube -->
+          <iframe width="560" height="315" src="https://www.youtube.com/embed/VvpuacjPCt8?si=BZEM_1-kswsCnqyP" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>        </div>
+        <div class="player-footer">
+          <div class="info-principal">Santos x Vasco</div>
+          <div class="info-destaque">0 x 0</div>
+        </div>
+      </article>
+
+      <!-- TELA 2: CABINE DE NARRAÇÃO -->
+      <article class="player-card" id="card-cabine">
+        <div class="video-container">
+          <div class="badge-ao-vivo"><span class="ponto-pulso"></span> Cabine de Narração</div>
+          <button class="btn-focar" onclick="definirPrincipal('card-cabine')">Expandir</button>
+          <!-- Substitua ID_VIDEO_CABINE pelo ID real do vídeo no YouTube -->
+          <iframe width="560" height="315" src="https://www.youtube.com/embed/Ri7-vnrJD3k?si=fM0xHsIY00fXsQKH" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+        <div class="player-footer">
+          <div class="info-principal">Cabine de Narração</div>
+          <div class="info-destaque">Transmissão Oficial</div>
+        </div>
+      </article>
+
+      <!-- TELA 3: ENTREVISTAS -->
+      <article class="player-card" id="card-entrevistas">
+        <div class="video-container">
+          <div class="badge-ao-vivo"><span class="ponto-pulso"></span> Entrevistas</div>
+          <button class="btn-focar" onclick="definirPrincipal('card-entrevistas')">Expandir</button>
+          <!-- Substitua ID_VIDEO_ENTREVISTAS pelo ID real do vídeo no YouTube -->
+          <iframe width="560" height="315" src="https://www.youtube.com/embed/Ri7-vnrJD3k?si=fM0xHsIY00fXsQKH" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+        <div class="player-footer">
+          <div class="info-principal">Resenha</div>
+          <div class="info-destaque">Entrevistas ao Vivo</div>
+        </div>
+      </article>
+
+    </div>
+  </main>
+
+  <script>
+    function definirPrincipal(idCard) {
+      const cards = document.querySelectorAll('.player-card');
+      cards.forEach(card => card.classList.remove('principal'));
+      document.getElementById(idCard).classList.add('principal');
+    }
+  </script>
+
+</body>
+</html>
